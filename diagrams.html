@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LibraryManager — Diagrammes (Use Case, Classe, Séquence)</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-meta: #94a3b8;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 20px 32px;
+      border-bottom: 2px solid var(--border-color);
+      background: var(--card-bg);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.025em;
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px;
+      display: grid;
+      gap: 40px;
+    }
+
+    section {
+      page-break-inside: avoid;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s ease;
+    }
+
+    section:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    section h2 {
+      margin: 0 0 20px 0;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .controls {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .spacer {
+      flex: 1;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--primary-color);
+      color: white;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .meta {
+      color: var(--text-meta);
+      font-size: 13px;
+      font-style: italic;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .diagram {
+      overflow: auto;
+      margin: 20px 0;
+      padding: 20px;
+      background: #fafbfc;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      min-height: 200px;
+      width: 100%;
+    }
+
+    .diagram svg {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Style spécifique pour le diagramme use case */
+    #usecase .diagram {
+      min-height: 800px;
+      overflow: auto;
+      padding: 30px;
+      background: #ffffff;
+    }
+
+    #usecase .diagram svg {
+      width: 100%;
+      height: auto;
+      min-width: 1000px;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      header {
+        padding: 16px 20px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      main {
+        padding: 20px;
+        gap: 24px;
+      }
+
+      section {
+        padding: 20px;
+      }
+
+      section h2 {
+        font-size: 18px;
+      }
+
+      .diagram {
+        padding: 12px;
+      }
+
+      #usecase .diagram {
+        min-height: 400px;
+        padding: 15px;
+      }
+
+      #usecase .diagram svg {
+        min-width: 800px;
+      }
+    }
+
+    @media print {
+      :root {
+        --bg-color: #fff;
+        --card-bg: #fff;
+        --border-color: #e5e7eb;
+      }
+
+      header, .controls {
+        display: none !important;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      main {
+        padding: 0;
+        max-width: 100%;
+      }
+
+      section {
+        break-inside: avoid;
+        page-break-after: always;
+        border: none;
+        padding: 0;
+        box-shadow: none;
+        margin-bottom: 20mm;
+      }
+
+      section:last-child {
+        page-break-after: auto;
+      }
+
+      section h2 {
+        border-bottom: 2px solid #000;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+      }
+
+      .diagram {
+        border: 1px solid #ccc;
+        padding: 12px;
+        page-break-inside: avoid;
+      }
+
+      .meta {
+        border-top: 1px solid #ccc;
+      }
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 15mm;
+    }
+  </style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      mermaid.initialize({ startOnLoad: true, theme: 'default', fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif' });
+    });
+    function printPage() { window.print(); }
+  </script>
+  <meta name="description" content="Diagrammes Mermaid pour LibraryManager: use case, diagramme de classes et séquence. Version imprimable." />
+</head>
+<body>
+  <header>
+    <div class="controls">
+      <h1>LibraryManager — Diagrammes</h1>
+      <div class="spacer"></div>
+      <span class="meta">Imprimable</span>
+      <button onclick="printPage()" title="Imprimer">Imprimer</button>
+    </div>
+  </header>
+  <main>
+    <section id="activity">
+      <h2>Diagramme d'activité — Processus global d'emprunt</h2>
+      <div class="diagram mermaid">
+        flowchart TD
+          A([Début]) --> B[Rechercher un livre]
+          B -->|Livre trouvé| C{Statut du livre ?}
+          B -->|Non trouvé| Z[Affiner la recherche]
+          Z --> B
+
+          C -->|Disponible| D[Rechercher/Identifier emprunteur]
+          C -->|Emprunté| E{Peut réserver ?}
+          C -->|Maintenance| H[Informer indisponibilité]
+          H --> G([Fin])
+
+          E -->|Oui| F[Créer réservation]
+          E -->|Non| H
+          F --> G
+
+          D --> I{Vérifier emprunteur}
+          I -->|Non trouvé| J[Créer nouvel emprunteur]
+          I -->|Trouvé| K{Vérifier statut actif}
+          J --> K
+
+          K -->|Inactif| L[Refuser: statut inactif]
+          K -->|Actif| M{Vérifier quota emprunts}
+          L --> G
+
+          M -->|Quota atteint| N[Refuser: quota dépassé]
+          M -->|Quota OK| O{Vérifier amendes impayées}
+          N --> G
+
+          O -->|Amendes impayées| P[Refuser: amendes à payer]
+          O -->|Aucune amende| Q[Calculer date d'échéance]
+          P --> G
+
+          Q --> R[Créer transaction LEND]
+          R --> S[Mettre à jour livre: status = borrowed]
+          S --> T[Incémenter borrow_count]
+          T --> U[Émettre reçu avec date d'échéance]
+          U --> G
+
+          classDef default fill:#ecfeff,stroke:#06b6d4,color:#064e3b,rx:10,ry:10;
+          classDef error fill:#fee2e2,stroke:#dc2626,color:#7f1d1d,rx:10,ry:10;
+          classDef success fill:#d1fae5,stroke:#10b981,color:#064e3b,rx:10,ry:10;
+          class L,N,P,H error
+          class U success
+      </div>
+      <p class="meta">Flux complet avec toutes les validations: statut emprunteur, quota, amendes, disponibilité livre.</p>
+    </section>
+
+    <section id="architecture-high">
+      <h2>Architecture système — Vue haut niveau</h2>
+      <div class="diagram mermaid">
+        flowchart LR
+          subgraph Client[Client]
+            U[Web Browser]
+          end
+
+          subgraph FE[Frontend SPA]
+            R[UI]
+            SVC[API Services]
+          end
+
+          subgraph BE[Backend API]
+            API[REST API]
+            RULES[Business Logic]
+          end
+
+          DB[(SQLite)]
+
+          U --> R
+          R --> SVC
+          SVC --> API
+          API --> RULES
+          RULES --> DB
+      </div>
+      <p class="meta">SPA React communique avec l'API Express; stockage persistant SQLite.</p>
+    </section>
+
+    <section id="architecture-low">
+      <h2>Architecture système — Vue détaillée (bas niveau)</h2>
+      <div class="diagram mermaid">
+        flowchart TB
+          subgraph Frontend
+            subgraph Pages
+              P1[Dashboard]
+              P2[Gestion Catalogue]
+              P3[Prêt]
+              P4[Retour]
+              P5[Rapports]
+            end
+            SAPI[services/api.js<br/>Axios]
+            State[State/UI Components]
+          end
+
+          subgraph Backend
+            MW[Express + CORS + JSON]
+            subgraph Routes
+              RB[/books/]
+              RBR[/borrowers/]
+              RT[/transactions/]
+              RR[/reports/]
+            end
+            BL[Business Rules]
+            DAL[SQLite Access]
+          end
+
+          DB2[(SQLite)]
+
+          P1 --> SAPI
+          P2 --> SAPI
+          P3 --> SAPI
+          P4 --> SAPI
+          P5 --> SAPI
+          SAPI --> MW
+          MW --> RB
+          MW --> RBR
+          MW --> RT
+          MW --> RR
+          RB --> BL
+          RBR --> BL
+          RT --> BL
+          RR --> BL
+          BL --> DAL
+          DAL --> DB2
+
+          classDef box fill:#f3f4f6,stroke:#9ca3af,color:#111827,rx:8,ry:8;
+          class Frontend,Backend,DB2 box;
+      </div>
+      <p class="meta">Séparation présentation / API / logique métier / accès données; routes alignées au domaine.</p>
+    </section>
+    <section id="usecase">
+      <h2>Use case (Cas d'utilisation)</h2>
+      <div class="diagram mermaid">
+        graph TB
+          subgraph Actors[" "]
+            A[Membre/Emprunteur]
+            B[Bibliothécaire]
+            C[Administrateur]
+          end
+
+          subgraph Catalog["Gestion Catalogue"]
+            UC1[Rechercher livre]
+            UC2[Consulter détails]
+            UC3[Filtrer catégorie]
+            UC4[Voir historique]
+            UC15[Ajouter livre]
+            UC16[Modifier livre]
+            UC17[Supprimer livre]
+            UC18[Opérations masse]
+            UC19[Gérer catégories]
+          end
+
+          subgraph Loans["Gestion Emprunts"]
+            UC5[Emprunter livre]
+            UC6[Retourner livre]
+            UC7[Calculer amende]
+            UC8[Évaluer condition]
+            UC9[Réserver livre]
+          end
+
+          subgraph Borrowers["Gestion Emprunteurs"]
+            UC10[Créer emprunteur]
+            UC11[Modifier emprunteur]
+            UC12[Supprimer emprunteur]
+            UC13[Consulter historique]
+            UC14[Voir emprunts actifs]
+          end
+
+          subgraph Reports["Rapports"]
+            UC20[Tableau de bord]
+            UC21[Rapport inventaire]
+            UC22[Livres par catégorie]
+            UC23[Livres populaires]
+            UC24[Activité emprunteurs]
+            UC25[Rapport retards]
+            UC26[Statistiques mensuelles]
+          end
+
+          subgraph Overdue["Gestion Retards"]
+            UC27[Consulter retards]
+            UC28[Filtrer par période]
+            UC29[Contacter emprunteur]
+          end
+
+          S[Système LibraryManager]
+
+          A --> UC1
+          A --> UC2
+          A --> UC3
+          A --> UC5
+          A --> UC6
+          A --> UC9
+
+          B --> UC1
+          B --> UC2
+          B --> UC3
+          B --> UC5
+          B --> UC6
+          B --> UC7
+          B --> UC8
+          B --> UC9
+          B --> UC10
+          B --> UC11
+          B --> UC12
+          B --> UC13
+          B --> UC14
+          B --> UC20
+          B --> UC27
+          B --> UC28
+          B --> UC29
+
+          C --> UC1
+          C --> UC2
+          C --> UC3
+          C --> UC4
+          C --> UC5
+          C --> UC6
+          C --> UC7
+          C --> UC8
+          C --> UC9
+          C --> UC10
+          C --> UC11
+          C --> UC12
+          C --> UC13
+          C --> UC14
+          C --> UC15
+          C --> UC16
+          C --> UC17
+          C --> UC18
+          C --> UC19
+          C --> UC20
+          C --> UC21
+          C --> UC22
+          C --> UC23
+          C --> UC24
+          C --> UC25
+          C --> UC26
+          C --> UC27
+          C --> UC28
+          C --> UC29
+
+          UC1 --> S
+          UC2 --> S
+          UC3 --> S
+          UC4 --> S
+          UC5 --> S
+          UC6 --> S
+          UC7 --> S
+          UC8 --> S
+          UC9 --> S
+          UC10 --> S
+          UC11 --> S
+          UC12 --> S
+          UC13 --> S
+          UC14 --> S
+          UC15 --> S
+          UC16 --> S
+          UC17 --> S
+          UC18 --> S
+          UC19 --> S
+          UC20 --> S
+          UC21 --> S
+          UC22 --> S
+          UC23 --> S
+          UC24 --> S
+          UC25 --> S
+          UC26 --> S
+          UC27 --> S
+          UC28 --> S
+          UC29 --> S
+
+          style A fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+          style B fill:#dbeafe,stroke:#2563eb,stroke-width:2px
+          style C fill:#fef3c7,stroke:#d97706,stroke-width:2px
+          style S fill:#ede9fe,stroke:#7c3aed,stroke-width:3px
+          style Catalog fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+          style Loans fill:#fef2f2,stroke:#dc2626,stroke-width:2px
+          style Borrowers fill:#f0f9ff,stroke:#0284c7,stroke-width:2px
+          style Reports fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+          style Overdue fill:#fdf2f8,stroke:#db2777,stroke-width:2px
+      </div>
+      <p class="meta">Cas d'utilisation complets: catalogue, emprunts, emprunteurs, rapports, retards, administration.</p>
+    </section>
+
+    <section id="class">
+      <h2>Diagramme de classes</h2>
+      <div class="diagram mermaid">
+        classDiagram
+          class Book {
+            +uuid id
+            +string title
+            +string author
+            +string isbn
+            +string category
+            +string publicationDate
+            +string publisher
+            +integer pages
+            +string language
+            +string description
+            +string location
+            +string condition
+            +string status
+            +datetime dateAdded
+            +integer borrowCount
+            +string coverImage
+            +isAvailable() bool
+            +canBeDeleted() bool
+          }
+
+          class Category {
+            +uuid id
+            +string name
+            +string description
+            +datetime createdAt
+          }
+
+          class Borrower {
+            +uuid id
+            +string name
+            +string email
+            +string phone
+            +string address
+            +datetime membershipDate
+            +string status
+            +string notes
+            +isActive() bool
+            +hasActiveLoans() bool
+            +getActiveLoansCount() int
+          }
+
+          class Transaction {
+            +uuid id
+            +uuid bookId
+            +uuid borrowerId
+            +string transactionType
+            +datetime transactionDate
+            +datetime dueDate
+            +datetime returnDate
+            +decimal fineAmount
+            +string notes
+            +isOverdue() bool
+            +calculateFine() decimal
+            +daysOverdue() int
+          }
+
+          class User {
+            +uuid id
+            +string name
+            +string email
+            +string role
+          }
+
+          class Librarian {
+            +enregistrerEmprunt()
+            +enregistrerRetour()
+            +calculerAmende()
+            +evaluerCondition()
+          }
+
+          class Administrator {
+            +gererCatalogue()
+            +gererAdherents()
+            +gererCategories()
+            +genererRapports()
+            +operationsMasse()
+          }
+
+          Book "1" --> "*" Transaction
+          Borrower "1" --> "*" Transaction
+          Category "1" --> "*" Book
+          User <|-- Librarian
+          User <|-- Administrator
+          Transaction --> Book
+          Transaction --> Borrower
+          Book --> Category
+      </div>
+      <p class="meta">Modèle complet avec toutes les classes, attributs de la base de données, et relations entre entités.</p>
+    </section>
+
+    <section id="sequence">
+      <h2>Diagramme de séquence — Emprunt d'un livre (complet avec validations)</h2>
+      <div class="diagram mermaid">
+        sequenceDiagram
+          autonumber
+          actor M as Membre
+          participant B as Bibliothécaire
+          participant API as API Backend
+          participant BL as Business Logic
+          participant DB as Base de données
+
+          M->>B: Demande d'emprunt (livre)
+          B->>API: POST /api/transactions/lend<br/>{book_id, borrower_id, due_date}
+          
+          API->>DB: BEGIN TRANSACTION
+          API->>DB: SELECT status FROM books WHERE id = ?
+          DB-->>API: Book status
+          
+          alt Livre non trouvé
+            API-->>B: 404 - Book not found
+          else Livre non disponible
+            API-->>B: 400 - Book is not available
+          else Livre disponible
+            API->>DB: SELECT status FROM borrowers WHERE id = ?
+            DB-->>API: Borrower status
+            
+            alt Emprunteur non trouvé
+              API-->>B: 404 - Borrower not found
+            else Emprunteur inactif
+              API->>DB: ROLLBACK
+              API-->>B: 400 - Borrower is not active
+            else Emprunteur actif
+              API->>DB: INSERT INTO transactions<br/>(lend transaction)
+              API->>DB: UPDATE books SET status='borrowed',<br/>borrow_count = borrow_count + 1
+              API->>DB: COMMIT
+              API-->>B: 201 - Book lent successfully<br/>{id, transaction_date, due_date}
+              B-->>M: Confirmation + reçu avec date d'échéance
+            end
+          end
+          
+          note over API,DB: Transaction atomique garantit<br/>cohérence des données
+      </div>
+      <p class="meta">Scénario complet avec gestion d'erreurs, validations, et transaction atomique pour garantir l'intégrité.</p>
+    </section>
+
+    <section id="sequence-return">
+      <h2>Diagramme de séquence — Retour d'un livre (avec calcul d'amende)</h2>
+      <div class="diagram mermaid">
+        sequenceDiagram
+          autonumber
+          actor B as Bibliothécaire
+          participant API as API Backend
+          participant BL as Business Logic
+          participant DB as Base de données
+
+          B->>API: Rechercher transaction par ID ou livre
+          API->>DB: SELECT * FROM transactions<br/>WHERE id = ? AND return_date IS NULL
+          DB-->>API: Transaction active
+          API-->>B: Détails prêt actif<br/>{book, borrower, due_date}
+          
+          B->>B: Évaluer condition du livre
+          B->>API: POST /api/transactions/return<br/>{transaction_id, fine_amount, notes}
+          
+          API->>DB: BEGIN TRANSACTION
+          API->>DB: SELECT * FROM transactions<br/>WHERE id = ? AND transaction_type='lend'<br/>AND return_date IS NULL
+          DB-->>API: Transaction
+          
+          alt Transaction non trouvée
+            API->>DB: ROLLBACK
+            API-->>B: 404 - Active lending transaction not found
+          else Transaction trouvée
+            API->>BL: Calculer amende si retard<br/>(julianday('now') - julianday(due_date))
+            BL-->>API: Fine amount
+            
+            API->>DB: UPDATE transactions SET<br/>return_date = NOW(),<br/>fine_amount = ?, notes = ?
+            API->>DB: UPDATE books SET status = 'available'<br/>WHERE id = ?
+            API->>DB: COMMIT
+            
+            API-->>B: 200 - Book returned successfully<br/>{return_date, fine_amount}
+            B-->>B: Afficher reçu avec amende si applicable
+          end
+          
+          note over API,DB: Transaction atomique garantit<br/>cohérence: retour + statut livre
+      </div>
+      <p class="meta">Processus complet: recherche transaction, calcul amende automatique, mise à jour atomique du statut.</p>
+    </section>
+
+    <section id="sequence-overdue">
+      <h2>Diagramme de séquence — Consultation des livres en retard</h2>
+      <div class="diagram mermaid">
+        sequenceDiagram
+          autonumber
+          actor B as Bibliothécaire
+          participant API as API Backend
+          participant DB as Base de données
+
+          B->>API: GET /api/transactions/overdue/list
+          API->>DB: SELECT t.*, b.title, b.author,<br/>br.name, br.email, br.phone,<br/>(julianday('now') - julianday(t.due_date))<br/>as overdue_days<br/>FROM transactions t<br/>JOIN books b ON t.book_id = b.id<br/>JOIN borrowers br ON t.borrower_id = br.id<br/>WHERE t.transaction_type = 'lend'<br/>AND t.return_date IS NULL<br/>AND t.due_date < date('now')<br/>ORDER BY t.due_date ASC
+          DB-->>API: Liste des prêts en retard
+          API-->>B: 200 - Overdue books<br/>[{book, borrower, overdue_days, fine}]
+          B->>B: Afficher tableau avec filtres<br/>(période, emprunteur, etc.)
+          
+          alt Contacter emprunteur
+            B->>B: Utiliser email/phone du résultat
+          end
+      </div>
+      <p class="meta">Consultation des retards avec calcul automatique des jours de retard et informations de contact.</p>
+    </section>
+
+    <section id="sequence-reservation">
+      <h2>Diagramme de séquence — Réservation d'un livre</h2>
+      <div class="diagram mermaid">
+        sequenceDiagram
+          autonumber
+          actor M as Membre
+          participant B as Bibliothécaire
+          participant API as API Backend
+          participant DB as Base de données
+
+          M->>B: Demande de réservation (livre)
+          B->>API: Vérifier disponibilité livre
+          API->>DB: SELECT status FROM books<br/>WHERE id = ? OR isbn = ?
+          DB-->>API: Book status
+          
+          alt Livre disponible
+            API-->>B: Livre disponible - proposer emprunt direct
+          else Tous les exemplaires empruntés
+            API->>DB: Vérifier réservation existante<br/>pour cet emprunteur
+            DB-->>API: Résultat
+            
+            alt Déjà réservé par cet emprunteur
+              API-->>B: 400 - Already reserved
+            else Créer réservation
+              API->>DB: INSERT INTO reservations<br/>(book_id, borrower_id, date_reservation)
+              API-->>B: 201 - Reservation created
+              B-->>M: Confirmation réservation
+            end
+          end
+          
+          note over API,DB: À un retour, vérifier réservations<br/>et notifier le prochain réservataire
+      </div>
+      <p class="meta">Réservation si aucun exemplaire disponible; vérification doublons; notification lors d'un retour.</p>
+    </section>
+
+    <section id="sequence-book-management">
+      <h2>Diagramme de séquence — Gestion du catalogue (Ajout/Modification)</h2>
+      <div class="diagram mermaid">
+        sequenceDiagram
+          autonumber
+          actor A as Administrateur
+          participant API as API Backend
+          participant DB as Base de données
+
+          A->>API: POST /api/books<br/>{title, author, isbn, category, ...}
+          API->>DB: Vérifier ISBN unique
+          DB-->>API: Résultat vérification
+          
+          alt ISBN déjà existant
+            API-->>A: 400 - ISBN already exists
+          else Données valides
+            API->>DB: INSERT INTO books<br/>(id, title, author, isbn, ...)
+            DB-->>API: Book created
+            API-->>A: 201 - Book created successfully<br/>{id}
+            A->>API: GET /api/books/:id
+            API->>DB: SELECT * FROM books WHERE id = ?
+            DB-->>API: Book details
+            API-->>A: 200 - Book details
+          end
+          
+          Note over A,API: Modification similaire avec<br/>PUT /api/books/:id
+      </div>
+      <p class="meta">Ajout de livre avec validation ISBN unique, modification avec préservation historique.</p>
+    </section>
+
+    <section id="sequence-borrower-management">
+      <h2>Diagramme de séquence — Gestion des emprunteurs</h2>
+      <div class="diagram mermaid">
+        sequenceDiagram
+          autonumber
+          actor A as Administrateur
+          participant API as API Backend
+          participant DB as Base de données
+
+          A->>API: POST /api/borrowers<br/>{name, email, phone, address}
+          API->>DB: Vérifier email unique
+          DB-->>API: Résultat
+          
+          alt Email déjà existant
+            API-->>A: 400 - Email already exists
+          else Création
+            API->>DB: INSERT INTO borrowers<br/>(id, name, email, phone, address,<br/>membership_date, status='active')
+            DB-->>API: Borrower created
+            API-->>A: 201 - Borrower created successfully
+          end
+          
+          A->>API: GET /api/borrowers/:id/transactions
+          API->>DB: SELECT t.*, b.title, b.author<br/>FROM transactions t<br/>JOIN books b ON t.book_id = b.id<br/>WHERE t.borrower_id = ?<br/>ORDER BY t.transaction_date DESC
+          DB-->>API: Transaction history
+          API-->>A: 200 - Borrower transaction history
+          
+          Note over A,API: Suppression vérifie<br/>emprunts actifs avant suppression
+      </div>
+      <p class="meta">Gestion complète: création avec validation email, consultation historique, suppression sécurisée.</p>
+    </section>
+
+    <section id="sequence-reports">
+      <h2>Diagramme de séquence — Génération de rapports</h2>
+      <div class="diagram mermaid">
+        sequenceDiagram
+          autonumber
+          actor A as Administrateur
+          participant API as API Backend
+          participant DB as Base de données
+
+          A->>API: GET /api/reports/dashboard-summary
+          
+          par Requêtes parallèles
+            API->>DB: SELECT COUNT(*), SUM(status='available'),<br/>SUM(status='borrowed') FROM books
+            API->>DB: SELECT COUNT(*), SUM(status='active')<br/>FROM borrowers
+            API->>DB: SELECT COUNT(*) FROM transactions<br/>WHERE return_date IS NULL<br/>AND due_date < date('now')
+            API->>DB: SELECT COUNT(*) FROM transactions<br/>WHERE transaction_date >= date('now', '-7 days')
+          end
+          
+          DB-->>API: Résultats (inventory, borrowers, overdue, recentActivity)
+          API-->>A: 200 - Dashboard summary<br/>{inventory, borrowers, overdue, recentActivity}
+          
+          A->>API: GET /api/reports/popular-books?limit=10
+          API->>DB: SELECT title, author, category,<br/>borrow_count, status<br/>FROM books<br/>ORDER BY borrow_count DESC<br/>LIMIT 10
+          DB-->>API: Popular books
+          API-->>A: 200 - Popular books list
+          
+          A->>API: GET /api/reports/monthly-stats?months=12
+          API->>DB: SELECT strftime('%Y-%m', transaction_date) as month,<br/>COUNT(*) as total_transactions,<br/>SUM(CASE WHEN transaction_type='lend' THEN 1 ELSE 0 END),<br/>SUM(fine_amount) as total_fines<br/>FROM transactions<br/>WHERE transaction_date >= date('now', '-12 months')<br/>GROUP BY month<br/>ORDER BY month DESC
+          DB-->>API: Monthly statistics
+          API-->>A: 200 - Monthly stats
+      </div>
+      <p class="meta">Génération de rapports: tableau de bord, livres populaires, statistiques mensuelles avec agrégations SQL.</p>
+    </section>
+  </main>
+</body>
+<noscript>Activez JavaScript pour afficher les diagrammes.</noscript>
+</html>
+
