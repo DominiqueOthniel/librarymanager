@@ -61,7 +61,22 @@ const isProd = process.env.NODE_ENV === 'production';
 if (isProd) {
   // Serve built React app
   const buildDir = path.join(__dirname, '..', 'build');
-  app.use(express.static(buildDir));
+  
+  // Custom static file handler with correct MIME types
+  app.use(express.static(buildDir, {
+    setHeaders: (res, filePath) => {
+      const ext = path.extname(filePath).toLowerCase();
+      if (ext === '.mjs') {
+        res.setHeader('Content-Type', 'application/javascript');
+      } else if (ext === '.js') {
+        res.setHeader('Content-Type', 'application/javascript');
+      } else if (ext === '.json') {
+        res.setHeader('Content-Type', 'application/json');
+      } else if (ext === '.css') {
+        res.setHeader('Content-Type', 'text/css');
+      }
+    }
+  }));
   
   // Fallback to index.html for React Router (must be last)
   app.get('*', (req, res) => {
