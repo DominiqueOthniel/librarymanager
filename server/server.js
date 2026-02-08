@@ -11,7 +11,35 @@ const { spec, swaggerUi, swaggerUiOptions } = require('./config/swagger');
 const app = express();
 
 // Middlewares
-app.use(cors());
+// CORS configuration - allow requests from Netlify and other origins
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    // List of allowed origins
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://librarynager.netlify.app',
+      'https://*.netlify.app'
+    ];
+    
+    // Check if origin is allowed
+    if (allowedOrigins.some(allowed => origin.includes(allowed.replace('*', '')))) {
+      callback(null, true);
+    } else {
+      // In production, you might want to be more strict
+      // For now, allow all origins (you can restrict this later)
+      callback(null, true);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: '1mb' }));
 
 // Swagger documentation
@@ -97,9 +125,11 @@ if (isProd) {
 // Start server with automatic port fallback if in use
 function startServer(preferredPort, attempt) {
   const portToUse = preferredPort;
+  const host = process.env.HOST || '0.0.0.0'; // Listen on all interfaces (required for Render)
   const server = app
-    .listen(portToUse, () => {
-      console.log(`Library Manager backend running on http://localhost:${portToUse}`);
+    .listen(portToUse, host, () => {
+      console.log(`✅ Library Manager backend running on port ${portToUse}`);
+      console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
     })
     .on('error', (err) => {
       if (err && err.code === 'EADDRINUSE' && attempt < 5) {
