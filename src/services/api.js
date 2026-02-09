@@ -3,6 +3,12 @@ import axios from 'axios';
 // Prefer environment variable (Vite) or fall back to Vite dev proxy (/api)
 const API_BASE_URL = import.meta?.env?.VITE_API_BASE_URL || '/api';
 
+// Debug: Log the API base URL (remove in production)
+if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
+  console.log('🔍 API_BASE_URL:', API_BASE_URL);
+  console.log('🔍 VITE_API_BASE_URL env:', import.meta?.env?.VITE_API_BASE_URL);
+}
+
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,
