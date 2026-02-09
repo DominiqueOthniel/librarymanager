@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const connectDB = require('./config/database');
@@ -84,13 +85,13 @@ app.use('/api/borrowers', borrowersRouter);
 app.use('/api/transactions', transactionsRouter);
 app.use('/api/reports', reportsRouter);
 
-// Serve static files - in production serve built React app, in dev serve public assets
+// Serve static files - only if build directory exists (for monolithic deployments)
+// On Render, backend and frontend are separate, so we only serve API
 const isProd = process.env.NODE_ENV === 'production';
-if (isProd) {
-  // Serve built React app
-  const buildDir = path.join(__dirname, '..', 'build');
-  
-  // Custom static file handler with correct MIME types
+const buildDir = path.join(__dirname, '..', 'build');
+
+if (isProd && fs.existsSync(buildDir)) {
+  // Serve built React app only if build directory exists (monolithic deployment)
   app.use(express.static(buildDir, {
     setHeaders: (res, filePath) => {
       const ext = path.extname(filePath).toLowerCase();
@@ -111,15 +112,51 @@ if (isProd) {
     res.sendFile(path.join(buildDir, 'index.html'));
   });
 } else {
-  // In development, serve public assets and info message
-  const publicDir = path.join(__dirname, '..', 'public');
-  app.use(express.static(publicDir));
+  // In development or when build doesn't exist (separate frontend/backend deployment)
+  // Serve public assets in dev mode
+  if (!isProd) {
+    const publicDir = path.join(__dirname, '..', 'public');
+    app.use(express.static(publicDir));
+  }
   
-  // Root info route for dev mode
+  // Root info route
   app.get('/', (req, res) => {
     const port = process.env.PORT || 5000;
-    res.type('text/plain').send(`Library Manager API is running.\nBackend: http://localhost:${port}/api\nAPI Docs (Swagger): http://localhost:${port}/api-docs\nFrontend: http://localhost:5173 (run npm start)`);
+    if (isProd) {
+      // Production mode - API only (frontend is separate)
+      res.json({
+        message: 'Library Manager API',
+        version: '1.0',
+        endpoints: {
+          api: '/api',
+          docs: '/api-docs',
+          health: '/api/health'
+        },
+        note: 'This is the backend API. Frontend is deployed separately.'
+      });
+    } else {
+      // Development mode
+      res.type('text/plain').send(`Library Manager API is running.\nBackend: http://localhost:${port}/api\nAPI Docs (Swagger): http://localhost:${port}/api-docs\nFrontend: http://localhost:5173 (run npm start)`);
+    }
   });
+  
+  // Handle non-API routes in production (when frontend is separate)
+  if (isProd) {
+    app.get('*', (req, res) => {
+      // Only handle non-API routes
+      if (!req.path.startsWith('/api')) {
+        res.status(404).json({
+          error: 'Not Found',
+          message: 'This is the backend API. Frontend is deployed separately.',
+          endpoints: {
+            api: '/api',
+            docs: '/api-docs',
+            health: '/api/health'
+          }
+        });
+      }
+    });
+  }
 }
 
 // Start server with automatic port fallback if in use
